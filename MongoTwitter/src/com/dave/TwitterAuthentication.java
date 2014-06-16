@@ -19,8 +19,6 @@ public class TwitterAuthentication extends Observable {
 
 
     
-    private long myUserId = 1230508812;
-    
     private Boolean myUserLoggedIn = new Boolean(false);
     
     /**

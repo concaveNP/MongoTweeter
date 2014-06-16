@@ -124,21 +124,24 @@ public class TwitterManager extends Thread implements Observer {
 				}
 			}
 		}
-		else if (arg0 == null) {
-			// TODO - this will be checked for some tweet container observable 
-			
+		else if (arg1 instanceof String) {
 			// Add the new tweet string to the queue of tweets waiting to be processed
 			if (arg1 instanceof String) {
 				myQueue.add((String) arg1);
 			}
-			
 		}
-		
 	}
-	
+
+	/**
+	 * Builds the URL for the tweet that was made
+	 * 
+	 * @param userHandel the user name 
+	 * @param tweetId the unique twitter id given for this tweet
+	 * 
+	 * @return the result built URL 
+	 */
 	private String buildTweetUrl(String userHandel, long tweetId) {
 		return new String("https://twitter.com/" + userHandel + "/status/" + Long.toString(tweetId));
 	}
-
 
 }

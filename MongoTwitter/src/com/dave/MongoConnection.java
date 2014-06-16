@@ -2,7 +2,7 @@ package com.dave;
 
 public class MongoConnection {
 
-	private String myHost;
+	private String myHost = "localhost";
 	private int myPort;
 	private String myUser;
 	private String myPass;
