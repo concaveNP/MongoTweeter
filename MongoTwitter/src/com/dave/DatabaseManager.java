@@ -3,71 +3,68 @@
  */
 package com.dave;
 
-import java.net.UnknownHostException;
+import java.util.StringTokenizer;
 
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.SimpleAttributeSet;
 
-import com.mongodb.MongoClient;
+import com.mongodb.BasicDBObject;
+import com.mongodb.DBObject;
 
 /**
  * @author dave
  *
  */
-public class DbConnectivityThread extends Thread {
+public class DatabaseManager extends Thread {
 
-	private static final String HOST = "localhost";
-	private MongoClient myMongoClient;
 	private Document myConnectivityStateModel;
 	private Document myDbNameModel;
 	private Document myCollectionNameModel;
-	private Document myFieldNameModel;
+	private Document myFieldNameAndFilterModel;
+	private DBObject myFilter;
 	
-	DbConnectivityThread(Document document) {
+	DatabaseManager(Document document) {
 		this.myConnectivityStateModel = document;
 	}
 	
 	@Override
 	public void run() {
-		
-		// Continue running until we are interrupted
-		while ( !isInterrupted() ) {
-			
-			try {
-				if ( isRequirmentsMeet() ) {
-	
-					// Connect to DB
-					ConnectToDb();
-					
-					// Test connection
-					
-					// Update text in GUI
-					setConnectivtyStateText("Connected!");
-				}
-			} catch (UnknownHostException ex) {
-				ex.printStackTrace();
-				
-				// Update text in GUI
-				setConnectivtyStateText("Not Connect: Unable to connect to the specified host \"" + HOST + "\" due to: " + ex.getMessage() );
-			}
-			
 
-			// Don't overwhelm the thread, take a break
-			try {
-				sleep(3000);
-			} catch (InterruptedException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
+		try {
+			// Continue running until we are interrupted
+			while ( !isInterrupted() ) {
+				
+				if ( isRequirmentsMeet() ) {
+				    // Have everything I need, inform the GUI
+					setConnectivtyStateText("looking good!");
+				}
+	
+				// Don't overwhelm the thread, take a break
+				sleep(1000);
 			}
+		} catch (InterruptedException e) {
+			// This thread has been stopped
 		}
 	}
 
-	private void ConnectToDb() throws UnknownHostException {
-		myMongoClient = new MongoClient( HOST );
-		
-		//DB db;
-		//db = myMongoClient.getDB( myDbNameModel.getText(0, myDbNameModel.getLength()) );
+	public void setDbNameModel(Document document) {
+		this.myDbNameModel = document;
+	}
+
+	public void setCollectionNameModel(Document document) {
+		this.myCollectionNameModel = document;
+	}
+
+	public void setFieldNameModel(Document document) {
+		this.myFieldNameAndFilterModel = document;
+	}	
+	
+	/**
+	 * @return the Filter that will be used to locate documents in the DB
+	 */
+	public DBObject getFilter() {
+		return myFilter;
 	}
 
 	/**
@@ -93,14 +90,54 @@ public class DbConnectivityThread extends Thread {
 		}
 		
 		// Is there a field name to work with
-		if ( (myFieldNameModel == null) || (myFieldNameModel.getLength() == 0) ) {
+		if ( (myFieldNameAndFilterModel == null) || (myFieldNameAndFilterModel.getLength() == 0) ) {
 			// Update state text in GUI
 			setConnectivtyStateText("Not Connected: There is no field name specified yet.");
 			
 			return false;
 		}
+		else {
+			try {
+				StringTokenizer tokens = new StringTokenizer(myFieldNameAndFilterModel.getText(0, myFieldNameAndFilterModel.getLength()), "><=", true);
+				
+				// Verify there is 3 or 4 tokens (user only gets to use one relational operators)
+				if (tokens.countTokens() == 3) {
+					String key = tokens.nextToken();
+					RelationalOperator operator = RelationalOperator.fromHumanString(tokens.nextToken());
+					String threshold = tokens.nextToken(); 
+					
+					myFilter = new BasicDBObject(key, new BasicDBObject(operator.getMongo(), new Integer(threshold)));
+				}
+				else if (tokens.countTokens() == 4) {
+					String key = tokens.nextToken();
+					RelationalOperator operator = RelationalOperator.fromHumanString(tokens.nextToken() + tokens.nextToken());
+					String threshold = tokens.nextToken(); 
+					
+					myFilter = new BasicDBObject(key, new BasicDBObject(operator.getMongo(), new Integer(threshold)));
+				}
+				else {
+					// The is filter is badly formed
 
-		// Success, all of the data appears to be present
+					// Update state text in GUI
+					setConnectivtyStateText("Not Connected: There is no field name filter is badly formed");
+					
+					return false;
+				}
+				
+			} catch (BadLocationException e) {
+				// Update state text in GUI
+				setConnectivtyStateText("Not Connected: There is no field name filter is badly formed");
+				
+				return false;
+			} catch (NumberFormatException e) {
+				// Update state text in GUI
+				setConnectivtyStateText("Not Connected: There is no field name filter is badly formed");
+				
+				return false;
+			}
+		}
+
+		// Success, all of the data appears to be present and well formed
 		return true;
 	}
 
@@ -117,16 +154,6 @@ public class DbConnectivityThread extends Thread {
 		}
 	}
 	
-	public void setDbNameModel(Document document) {
-		this.myDbNameModel = document;
-	}
 
-	public void setCollectionNameModel(Document document) {
-		this.myCollectionNameModel = document;
-	}
-
-	public void setFieldNameModel(Document document) {
-		this.myFieldNameModel = document;
-	}
 
 }
