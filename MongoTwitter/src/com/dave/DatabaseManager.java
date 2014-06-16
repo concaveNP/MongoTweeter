@@ -19,7 +19,7 @@ import com.mongodb.MongoClient;
 
 /**
  * @author dave
- *
+ * 
  */
 public class DatabaseManager extends Thread {
 
@@ -30,28 +30,29 @@ public class DatabaseManager extends Thread {
 	private DBObject myFilter;
 	private MongoClient myMongoClient;
 	private MongoConnection myConnection;
-	
+
 	DatabaseManager(MongoConnection connection, Document document) {
 		this.myConnection = connection;
 		this.myConnectivityStateModel = document;
 	}
-	
+
 	@Override
 	public void run() {
 
 		try {
 			// TODO - more of the connection details could be applied here
 			// Establish connection
-			myMongoClient = new MongoClient( myConnection.getHost() );
+			myMongoClient = new MongoClient(myConnection.getHost());
 
 			// Continue running until we are interrupted
-			while ( !isInterrupted() ) {
-				
-			    // If everything is in place, show the user the number of entries that could be published
-				if ( isRequirmentsMeet() ) {
+			while (!isInterrupted()) {
+
+				// If everything is in place, show the user the number of
+				// entries that could be published
+				if (isRequirmentsMeet()) {
 					countEntries();
 				}
-	
+
 				// Don't overwhelm the thread, take a break
 				sleep(1000);
 			}
@@ -73,8 +74,8 @@ public class DatabaseManager extends Thread {
 
 	public void setFieldNameModel(Document document) {
 		this.myFieldNameAndFilterModel = document;
-	}	
-	
+	}
+
 	/**
 	 * @return the Filter that will be used to locate documents in the DB
 	 */
@@ -83,85 +84,95 @@ public class DatabaseManager extends Thread {
 	}
 
 	/**
-	 * Checks to see if all the required information needed to request the information we want is available
+	 * Checks to see if all the required information needed to request the
+	 * information we want is available
 	 * 
-	 * @return True is we have all of the information we need and False otherwise
+	 * @return True is we have all of the information we need and False
+	 *         otherwise
 	 */
 	private boolean isRequirmentsMeet() {
 		// Is there a DB name to work with
-		if ( (myDbNameModel == null) || (myDbNameModel.getLength() == 0) ) {
+		if ((myDbNameModel == null) || (myDbNameModel.getLength() == 0)) {
 			// Update state text in GUI
 			setConnectivtyStateText("Not Connected: There is no DB name specified yet.");
-			
+
 			return false;
 		}
 
 		// Is there a collection name to work with
-		if ( (myCollectionNameModel == null) || (myCollectionNameModel.getLength() == 0) ) {
+		if ((myCollectionNameModel == null)
+				|| (myCollectionNameModel.getLength() == 0)) {
 			// Update state text in GUI
 			setConnectivtyStateText("Not Connected: There is no collection name specified yet.");
-			
+
 			return false;
 		}
-		
+
 		// Is there a field name to work with
-		if ( (myFieldNameAndFilterModel == null) || (myFieldNameAndFilterModel.getLength() == 0) ) {
+		if ((myFieldNameAndFilterModel == null)
+				|| (myFieldNameAndFilterModel.getLength() == 0)) {
 			// Update state text in GUI
 			setConnectivtyStateText("Not Connected: There is no field name specified yet.");
-			
+
 			return false;
-		}
-		else {
+		} else {
 			try {
-				StringTokenizer tokens = new StringTokenizer(myFieldNameAndFilterModel.getText(0, myFieldNameAndFilterModel.getLength()), "><=", true);
-				
-				// Verify there is 3 or 4 tokens (user only gets to use one relational operators)
+				StringTokenizer tokens = new StringTokenizer(
+						myFieldNameAndFilterModel.getText(0,
+								myFieldNameAndFilterModel.getLength()), "><=",
+						true);
+
+				// Verify there is 3 or 4 tokens (user only gets to use one
+				// relational operators)
 				if (tokens.countTokens() == 3) {
-					String key = tokens.nextToken().trim();	
-					RelationalOperator operator = RelationalOperator.fromHumanString(tokens.nextToken().trim());
-					String thresholdString = tokens.nextToken().trim();
-					Object threshold = thresholdString;
-					
-					try {
-						Integer thresholdInteger = new Integer(thresholdString);
-						threshold = thresholdInteger;
-					} catch ( NumberFormatException ex ) {
-						// do nothing
-					}
-					
-					myFilter = new BasicDBObject(key, new BasicDBObject(operator.getMongo(), threshold));
-				}
-				else if (tokens.countTokens() == 4) {
 					String key = tokens.nextToken().trim();
-					RelationalOperator operator = RelationalOperator.fromHumanString(tokens.nextToken().trim() + tokens.nextToken().trim());
+					RelationalOperator operator = RelationalOperator
+							.fromHumanString(tokens.nextToken().trim());
 					String thresholdString = tokens.nextToken().trim();
 					Object threshold = thresholdString;
-					
+
 					try {
 						Integer thresholdInteger = new Integer(thresholdString);
 						threshold = thresholdInteger;
-					} catch ( NumberFormatException ex ) {
+					} catch (NumberFormatException ex) {
 						// do nothing
 					}
-					
-					myFilter = new BasicDBObject(key, new BasicDBObject(operator.getMongo(), threshold));
-				}
-				else {
+
+					myFilter = new BasicDBObject(key, new BasicDBObject(
+							operator.getMongo(), threshold));
+				} else if (tokens.countTokens() == 4) {
+					String key = tokens.nextToken().trim();
+					RelationalOperator operator = RelationalOperator
+							.fromHumanString(tokens.nextToken().trim()
+									+ tokens.nextToken().trim());
+					String thresholdString = tokens.nextToken().trim();
+					Object threshold = thresholdString;
+
+					try {
+						Integer thresholdInteger = new Integer(thresholdString);
+						threshold = thresholdInteger;
+					} catch (NumberFormatException ex) {
+						// do nothing
+					}
+
+					myFilter = new BasicDBObject(key, new BasicDBObject(
+							operator.getMongo(), threshold));
+				} else {
 					// Update state text in GUI
 					setConnectivtyStateText("Not Connected: Field name filter is badly formed");
-					
+
 					return false;
 				}
-				
+
 			} catch (BadLocationException e) {
 				// Update state text in GUI
 				setConnectivtyStateText("Not Connected: Field name filter is badly formed");
-				
+
 				return false;
 			} catch (NumberFormatException e) {
 				// Update state text in GUI
 				setConnectivtyStateText("Not Connected: Field name filter is badly formed");
-				
+
 				return false;
 			}
 		}
@@ -173,24 +184,29 @@ public class DatabaseManager extends Thread {
 	private void setConnectivtyStateText(String text) {
 		try {
 			// Clear the text
-			myConnectivityStateModel.remove(0, myConnectivityStateModel.getLength());
-			
+			myConnectivityStateModel.remove(0,
+					myConnectivityStateModel.getLength());
+
 			// Add the next text
-			myConnectivityStateModel.insertString(0, text, SimpleAttributeSet.EMPTY);
+			myConnectivityStateModel.insertString(0, text,
+					SimpleAttributeSet.EMPTY);
 		} catch (BadLocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
+
 	private void countEntries() {
 		try {
 			// Get the data
-			DB db = myMongoClient.getDB( myDbNameModel.getText(0, myDbNameModel.getLength()).trim() );
-			DBCollection collection = db.getCollection(myCollectionNameModel.getText(0, myCollectionNameModel.getLength()).trim());
+			DB db = myMongoClient.getDB(myDbNameModel.getText(0,
+					myDbNameModel.getLength()).trim());
+			DBCollection collection = db.getCollection(myCollectionNameModel
+					.getText(0, myCollectionNameModel.getLength()).trim());
 			DBCursor cursor = collection.find(myFilter);
 
-			setConnectivtyStateText("Current Criteria yeilds: " + cursor.count() + " documents");
+			setConnectivtyStateText("Current Criteria yeilds: "
+					+ cursor.count() + " documents");
 		} catch (BadLocationException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

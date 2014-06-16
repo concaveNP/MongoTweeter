@@ -62,7 +62,8 @@ public class MainApplication extends JFrame {
 	public void initialize() {
 
 		// Create the various threads that make up the application
-		myDbManager = new DatabaseManager(myDbConnection,myDbConnectivityStateModel);
+		myDbManager = new DatabaseManager(myDbConnection,
+				myDbConnectivityStateModel);
 		myTwitterManager = new TwitterManager(myTwitterAuth, myDbTweetsModel);
 
 		setLayout(new GridLayout(2, 1));
@@ -73,7 +74,7 @@ public class MainApplication extends JFrame {
 		// Create Twitter panel
 		createTwitterPanel();
 
-		// Connect the twitter authorized observers 
+		// Connect the twitter authorized observers
 		myTwitterAuth.addObserver(myTwitterManager);
 
 		// Start the threads
@@ -95,14 +96,14 @@ public class MainApplication extends JFrame {
 		dbPanel.add(new JLabel("Database Name: "));
 		myDbNameTextField = new JTextField();
 		myDbManager.setDbNameModel(myDbNameTextField.getDocument());
-		//myDbNameTextField.setText("inventory");
+		// myDbNameTextField.setText("inventory");
 		dbPanel.add(myDbNameTextField);
 
 		dbPanel.add(new JLabel("Collection Name: "));
 		myCollectionNameTextField = new JTextField();
 		myDbManager.setCollectionNameModel(myCollectionNameTextField
 				.getDocument());
-		//myCollectionNameTextField.setText("publications");
+		// myCollectionNameTextField.setText("publications");
 		dbPanel.add(myCollectionNameTextField);
 
 		dbPanel.add(new JLabel("Field Name and Filter: "));
@@ -132,13 +133,11 @@ public class MainApplication extends JFrame {
 				myDisconnectButton.setEnabled(true);
 
 				// Create a data publisher instance
-				myDataPublisher = new DataPublisher(
-						myDbConnection,
+				myDataPublisher = new DataPublisher(myDbConnection,
 						myDbNameTextField.getText().trim(),
-						myCollectionNameTextField.getText().trim(), 
-						myDbManager.getFilter(),
-						myTwitterManager);
-				
+						myCollectionNameTextField.getText().trim(), myDbManager
+								.getFilter(), myTwitterManager);
+
 				// Start the thread
 				myDataPublisher.start();
 			}
@@ -196,11 +195,12 @@ public class MainApplication extends JFrame {
 				try {
 					// Clear the tweets
 					myDbTweetsModel.remove(0, myDbTweetsModel.getLength());
-	
+
 					// Disable the tweeting
 					myTwitterManager.setTweetingEnabled(false);
-	
-					// Enable the start button and disable the stop button now the
+
+					// Enable the start button and disable the stop button now
+					// the
 					// thread is stopped
 					myStartButton.setEnabled(true);
 					myStopButton.setEnabled(false);

@@ -8,26 +8,26 @@ import java.util.Observable;
 import twitter4j.auth.AccessToken;
 
 /**
- * This class is responsible for gathering the credentials needed for tweets to be issued from this application.  It listens in user input from the GUI and once all information is 
- * available the GUI  
+ * This class is responsible for gathering the credentials needed for tweets to
+ * be issued from this application. It listens in user input from the GUI and
+ * once all information is available the GUI
  * 
  * 
  * @author dave
- *
+ * 
  */
 public class TwitterAuthentication extends Observable {
 
+	private Boolean myUserLoggedIn = new Boolean(false);
 
-    
-    private Boolean myUserLoggedIn = new Boolean(false);
-    
-    /**
-     * Build an access token using the stored token information
-     * 
-     * @return the access token
-     */
+	/**
+	 * Build an access token using the stored token information
+	 * 
+	 * @return the access token
+	 */
 	public AccessToken getAccessToken() {
-		return new AccessToken(CONCAVENP_ACCESS_TOKEN, CONCAVENP_ACCESS_TOKEN_SECRET, myUserId);		
+		return new AccessToken(CONCAVENP_ACCESS_TOKEN,
+				CONCAVENP_ACCESS_TOKEN_SECRET, myUserId);
 	}
 
 	/**
@@ -40,7 +40,7 @@ public class TwitterAuthentication extends Observable {
 	 */
 	public void setUserLoggedIn(boolean value) {
 		myUserLoggedIn = new Boolean(value);
-		
+
 		setChanged();
 		notifyObservers(myUserLoggedIn);
 	}

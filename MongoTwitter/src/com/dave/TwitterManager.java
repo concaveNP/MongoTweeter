@@ -30,12 +30,12 @@ public class TwitterManager extends Thread implements Observer {
 	 * The duration the polling queue should wait for a new item to process
 	 */
 	private static long POLLING_FREQUENCY = 100;
-	
+
 	/**
 	 * The maximum message size a tweet can be
 	 */
 	private static int MAX_TWEET_LENGTH = 140;
-	
+
 	private TwitterRules myTwitterRules = new TwitterRules();
 	private BlockingQueue<String> myQueue = new LinkedBlockingQueue<String>();
 	private TwitterAuthentication myTwitterAuth;
@@ -43,45 +43,50 @@ public class TwitterManager extends Thread implements Observer {
 	private boolean myTweetingEnabled = false;
 	private boolean myUserLoggedIn = false;
 	private Twitter myTwitter;
-	
+
 	public TwitterManager(TwitterAuthentication twitterAuth, Document model) {
 		this.myTwitterAuth = twitterAuth;
 		this.myModel = model;
 		this.myTwitter = new TwitterFactory().getInstance();
 	}
-	
+
 	@Override
 	public void run() {
 
 		try {
 			// Keep running until we are interrupted
 			while (isInterrupted() == false) {
-				
-				// Check to see if there is a user checked in and tweeting is enabled
+
+				// Check to see if there is a user checked in and tweeting is
+				// enabled
 				if ((myUserLoggedIn == true) && (isTweetingEnabled())) {
-					
+
 					try {
-						String item = myQueue.poll(POLLING_FREQUENCY, TimeUnit.MILLISECONDS);
+						String item = myQueue.poll(POLLING_FREQUENCY,
+								TimeUnit.MILLISECONDS);
 
 						// Check to see if there is something to process
-						if (item != null)
-						{
+						if (item != null) {
 							// Check to see if the tweet is too long
 							if (item.length() > MAX_TWEET_LENGTH) {
 								// TODO - Get it to gist to work
-							}
-							else {
+							} else {
 								// Tweet the status update
 								Status status = myTwitter.updateStatus(item);
-								
-								// Build the resulting URL and put it in the data model being shown in the GUI 
-								String tweetUrl = buildTweetUrl(status.getUser().getScreenName(), status.getId());
-								
+
+								// Build the resulting URL and put it in the
+								// data model being shown in the GUI
+								String tweetUrl = buildTweetUrl(status
+										.getUser().getScreenName(),
+										status.getId());
+
 								// Append the tweet the document model
-								myModel.insertString(myModel.getLength(), tweetUrl + "\n", null);
+								myModel.insertString(myModel.getLength(),
+										tweetUrl + "\n", null);
 							}
-							
-							// Sleep for a rule specified duration to keep tweets from being too frequent
+
+							// Sleep for a rule specified duration to keep
+							// tweets from being too frequent
 							sleep(myTwitterRules.getTweetFrequency());
 						}
 					} catch (TwitterException e) {
@@ -91,8 +96,7 @@ public class TwitterManager extends Thread implements Observer {
 						// TODO Auto-generated catch block
 						e.printStackTrace();
 					}
-				}
-				else {
+				} else {
 					// Nothing going on, lets sleep for a bit
 					sleep(POLLING_FREQUENCY);
 				}
@@ -112,20 +116,22 @@ public class TwitterManager extends Thread implements Observer {
 
 	@Override
 	public void update(Observable arg0, Object arg1) {
-		
+
 		if (arg0 instanceof TwitterAuthentication) {
 			if (arg1 instanceof Boolean) {
-				myUserLoggedIn = (Boolean)arg1;
-				
+				myUserLoggedIn = (Boolean) arg1;
+
 				if (myUserLoggedIn == true) {
 					// Set the new credentials
-					myTwitter.setOAuthConsumer(TwitterAuthentication.API_KEY, TwitterAuthentication.API_KEY_SECRET);
-					myTwitter.setOAuthAccessToken(myTwitterAuth.getAccessToken());
+					myTwitter.setOAuthConsumer(TwitterAuthentication.API_KEY,
+							TwitterAuthentication.API_KEY_SECRET);
+					myTwitter.setOAuthAccessToken(myTwitterAuth
+							.getAccessToken());
 				}
 			}
-		}
-		else if (arg1 instanceof String) {
-			// Add the new tweet string to the queue of tweets waiting to be processed
+		} else if (arg1 instanceof String) {
+			// Add the new tweet string to the queue of tweets waiting to be
+			// processed
 			if (arg1 instanceof String) {
 				myQueue.add((String) arg1);
 			}
@@ -135,13 +141,16 @@ public class TwitterManager extends Thread implements Observer {
 	/**
 	 * Builds the URL for the tweet that was made
 	 * 
-	 * @param userHandel the user name 
-	 * @param tweetId the unique twitter id given for this tweet
+	 * @param userHandel
+	 *            the user name
+	 * @param tweetId
+	 *            the unique twitter id given for this tweet
 	 * 
-	 * @return the result built URL 
+	 * @return the result built URL
 	 */
 	private String buildTweetUrl(String userHandel, long tweetId) {
-		return new String("https://twitter.com/" + userHandel + "/status/" + Long.toString(tweetId));
+		return new String("https://twitter.com/" + userHandel + "/status/"
+				+ Long.toString(tweetId));
 	}
 
 }
