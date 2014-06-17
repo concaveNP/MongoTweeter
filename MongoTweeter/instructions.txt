@@ -1,0 +1,25 @@
+Steps for running the application:
+
+
+
+-1.	You also need the egit-github project in your eclipse workspace
+0.	Since I have the current keys and tokens hard coded for myself, follow "concaveNP" on twitter to see the results
+1.	Load the database with the data specified in the "./DB/example_data_used.txt" file.
+2.	That creates the "inventory" db with a "publications" collection and "mydb" with a "testData" collection
+3.	Modify the project by putting in the keys and tokens in the GistAuthenticaiton and TwitterAuthentication classes with the values specified in other given document
+4.	Run the application  (main is in MainApplication)
+5.	Enter "inventory" for db
+6.	Enter "publications" for collection
+7. 	Enter "sales.books.count >= 100"
+8.	The connection status field now contains "Current Criteria yeilds: 3 documents"
+9.	Click the "Start Data Publish" button.  This is create a thread to uses the search criteria to populate a queue of tweet-able data
+10.	Click the "Enable Tweeting" button.  This allows the tweeting thread to tweet any messages waiting in its queue
+11.	Tweets will start rolling by in the tweets text area
+12.	Click the "Stop Data Publish" button
+13.	Modify the fields for: db=mydb, collection=testData, field=x>23
+14.	Click the "Start Data Publish" button.
+15.	Two more tweets will show their URLs
+16.	From twitter (following concaveNP tweets) there will be 5 new tweets with the first 3 being too big and 2 show the document findings
+17.	From one of the tweets that contains a link to a Gist file, click the link to open the file
+18.	The Gist file will contain all of the search results found for this application session
+19. Go easy on the tweets, I just used my twitter account for this.  :)

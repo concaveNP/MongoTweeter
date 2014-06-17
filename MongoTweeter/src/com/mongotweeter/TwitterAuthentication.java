@@ -9,40 +9,37 @@ import twitter4j.auth.AccessToken;
 
 /**
  * This class is responsible for gathering the credentials needed for tweets to
- * be issued from this application. It listens in user input from the GUI and
- * once all information is available the GUI
- * 
+ * be issued from this application. Currently, values are hard coded.
  * 
  * @author dave
- * 
  */
 public class TwitterAuthentication extends Observable {
 
 	/**
 	 * This application's key used for OAuth
 	 */
-	public static final String API_KEY = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+	public static final String API_KEY = "xxxxxxxxxxxxxxxxxxxxx";
 	
 	/**
 	 * This application's secret key used for OAuth
 	 */
-	public static final String API_KEY_SECRET = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+	public static final String API_KEY_SECRET = "xxxxxxxxxxxxx";
 
 	/**
 	 * The hard coded token for the developer user - for now 
 	 */
-	private static final String CONCAVENP_ACCESS_TOKEN = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+	private static final String CONCAVENP_ACCESS_TOKEN = "xxxxxxxxxxxxxxxx";
 
 	/**
 	 * The hard coded secret token for the developer user - for now 
 	 */
-	private static final String CONCAVENP_ACCESS_TOKEN_SECRET = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+	private static final String CONCAVENP_ACCESS_TOKEN_SECRET = "xxxxxxxxxxxxxxxxxx";
 
 	/**
-	 * The hard coded developer user ID - for now 
+	 * The hard coded developer user ID (concaveNP)- for now 
 	 */
-	private static long myUserId = 00000000000000000000000000000;
-
+	private static long myUserId = 000000000;
+	
 	/**
 	 * The state of the this application being logged in as seen from the user's twitter account
 	 */

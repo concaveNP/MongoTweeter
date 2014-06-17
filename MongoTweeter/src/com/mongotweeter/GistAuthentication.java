@@ -22,8 +22,8 @@ public class GistAuthentication {
 	/**
 	 * The hard coded token for the developer user - for now 
 	 */
-	private static final String ACCESS_TOKEN_SECRET = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
-
+	private static final String ACCESS_TOKEN_SECRET = "xxxxxxxxxxxxx";
+	
 	/**
 	 * Build an Gist Authorization object which includes the access token for
 	 * the user's GitHub Gist documents.

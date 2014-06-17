@@ -3,6 +3,9 @@
  */
 package com.mongotweeter;
 
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -13,6 +16,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.text.BadLocationException;
@@ -34,21 +38,26 @@ public class MainApplication extends JFrame {
 	 * Generated serial ID
 	 */
 	private static final long serialVersionUID = -1186753475176386282L;
+	
+	/**
+	 * The minimum size of the application
+	 */
+	private static final Dimension myMinSize = new Dimension(700,300);
 
-	private DatabaseManager myDbManager;
+	private DatabaseThread myDatabaseThread;
 	private JTextField myDbNameTextField;
 	private JTextField myCollectionNameTextField;
 	private JTextField myFieldNameTextField;
 	private JButton myStartButton;
 	private JButton myStopButton;
-	private TwitterManager myTwitterManager;
+	private TwitterThread myTwitterThread;
 	private TwitterAuthentication myTwitterAuth = new TwitterAuthentication();
 	private GistAuthentication myGistAuth = new GistAuthentication();
 	private Document myDbConnectivityStateModel = new PlainDocument();
 	private Document myDbTweetsModel = new PlainDocument();
 	private JButton myConnectButton;
 	private JButton myDisconnectButton;
-	private JTextArea myConnectivityStateTextArea;
+	private JTextField myConnectivityStateTextField;
 	private DataPublisher myDataPublisher;
 	private MongoConnection myDbConnection = new MongoConnection();
 
@@ -59,9 +68,9 @@ public class MainApplication extends JFrame {
 		// Start the application
 		MainApplication application = new MainApplication();
 		application.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-		application.setSize(700, 300);
-		// TODO - get the screen dimension and use those values
-		application.setLocation(700, 400);
+		application.setSize(myMinSize);
+		application.setMinimumSize(myMinSize);
+		application.setLocation(700, 400); // TODO - get the screen dimension and use those values
 		application.initialize();
 		application.setVisible(true);
 	}
@@ -69,12 +78,12 @@ public class MainApplication extends JFrame {
 	public void initialize() {
 
 		// Create the various threads that make up the application
-		myDbManager = new DatabaseManager(myDbConnection,
+		myDatabaseThread = new DatabaseThread(myDbConnection,
 				myDbConnectivityStateModel);
-		myTwitterManager = new TwitterManager(myTwitterAuth, myGistAuth,
+		myTwitterThread = new TwitterThread(myTwitterAuth, myGistAuth,
 				myDbTweetsModel);
 
-		setLayout(new GridLayout(2, 1));
+		setLayout(new BorderLayout());
 
 		// Create DB panel
 		createDbPanel();
@@ -83,11 +92,11 @@ public class MainApplication extends JFrame {
 		createTwitterPanel();
 
 		// Connect the twitter authorized observers
-		myTwitterAuth.addObserver(myTwitterManager);
+		myTwitterAuth.addObserver(myTwitterThread);
 
 		// Start the threads
-		myDbManager.start();
-		myTwitterManager.start();
+		myDatabaseThread.start();
+		myTwitterThread.start();
 
 		// Kick start the TwitterAuth into thinking a user has just got this app
 		// authorized for use
@@ -97,36 +106,46 @@ public class MainApplication extends JFrame {
 	private void createDbPanel() {
 		JPanel dbPanel = new JPanel();
 		dbPanel.setBorder(BorderFactory.createTitledBorder("Database"));
+		dbPanel.setLayout(new BorderLayout());
 
-		dbPanel.setLayout(new GridLayout(5, 2));
-
-		// Create the database name label and text field
-		dbPanel.add(new JLabel("Database Name: "));
+		JPanel searchPanel = new JPanel();
+		searchPanel.setLayout(new BorderLayout());
+		
+		JPanel labelsPanel = new JPanel();
+		labelsPanel.setLayout(new GridLayout(4,1));
+		
+		JPanel textsPanel = new JPanel();
+		textsPanel.setLayout(new GridLayout(4,1));
+		
+		labelsPanel.add(new JLabel("Database Name: "));
 		myDbNameTextField = new JTextField();
-		myDbManager.setDbNameModel(myDbNameTextField.getDocument());
-		// myDbNameTextField.setText("inventory");
-		dbPanel.add(myDbNameTextField);
+		myDatabaseThread.setDbNameModel(myDbNameTextField.getDocument());
+		textsPanel.add(myDbNameTextField);
 
-		dbPanel.add(new JLabel("Collection Name: "));
+		labelsPanel.add(new JLabel("Collection Name: "));
 		myCollectionNameTextField = new JTextField();
-		myDbManager.setCollectionNameModel(myCollectionNameTextField
-				.getDocument());
-		// myCollectionNameTextField.setText("publications");
-		dbPanel.add(myCollectionNameTextField);
+		myDatabaseThread.setCollectionNameModel(myCollectionNameTextField.getDocument());
+		textsPanel.add(myCollectionNameTextField);
 
-		dbPanel.add(new JLabel("Field Name and Filter: "));
+		labelsPanel.add(new JLabel("Field Name and Filter: "));
 		myFieldNameTextField = new JTextField();
-		myDbManager.setFieldNameModel(myFieldNameTextField.getDocument());
-		dbPanel.add(myFieldNameTextField);
+		myDatabaseThread.setFieldNameModel(myFieldNameTextField.getDocument());
+		textsPanel.add(myFieldNameTextField);
 
-		dbPanel.add(new JLabel("Connection Status: "));
-		myConnectivityStateTextArea = new JTextArea(myDbConnectivityStateModel);
-		myConnectivityStateTextArea.setEditable(false);
-		myConnectivityStateTextArea.setBorder(BorderFactory
-				.createLineBorder(getForeground()));
-		dbPanel.add(myConnectivityStateTextArea);
+		labelsPanel.add(new JLabel("Connection Status: "));
+		myConnectivityStateTextField = new JTextField(myDbConnectivityStateModel, null, 0);
+		myConnectivityStateTextField.setEditable(false);
+		textsPanel.add(myConnectivityStateTextField);
+		
+		// Add the labels and texts panels to the search panel
+		searchPanel.add(labelsPanel, BorderLayout.WEST);
+		searchPanel.add(textsPanel, BorderLayout.CENTER);
+		dbPanel.add(searchPanel, BorderLayout.NORTH);
 
-		myConnectButton = new JButton("Connect DB to Twitter");
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+		
+		myConnectButton = new JButton("Start Data Publish");
 		myConnectButton.setEnabled(true);
 		myConnectButton.addActionListener(new ActionListener() {
 
@@ -137,21 +156,21 @@ public class MainApplication extends JFrame {
 				myConnectButton.setEnabled(false);
 				myDbNameTextField.setEnabled(false);
 				myCollectionNameTextField.setEnabled(false);
-				myFieldNameTextField.setEditable(false);
+				myFieldNameTextField.setEnabled(false);
 				myDisconnectButton.setEnabled(true);
 
 				// Create a data publisher instance
 				myDataPublisher = new DataPublisher(myDbConnection,
 						myDbNameTextField.getText().trim(),
-						myCollectionNameTextField.getText().trim(), myDbManager
-								.getFilter(), myTwitterManager);
+						myCollectionNameTextField.getText().trim(), myDatabaseThread
+								.getFilter(), myTwitterThread);
 
 				// Start the thread
 				myDataPublisher.start();
 			}
 		});
-		dbPanel.add(myConnectButton);
-		myDisconnectButton = new JButton("Disconnect DB from Twitter");
+		buttonPanel.add(myConnectButton);
+		myDisconnectButton = new JButton("Stop Data Publish");
 		myDisconnectButton.setEnabled(false);
 		myDisconnectButton.addActionListener(new ActionListener() {
 
@@ -162,31 +181,37 @@ public class MainApplication extends JFrame {
 				myConnectButton.setEnabled(true);
 				myDbNameTextField.setEnabled(true);
 				myCollectionNameTextField.setEnabled(true);
-				myFieldNameTextField.setEditable(true);
+				myFieldNameTextField.setEnabled(true);
 				myDisconnectButton.setEnabled(false);
 
 				// Kill the publisher thread
 				stopThread(myDataPublisher);
 			}
 		});
-		dbPanel.add(myDisconnectButton);
+		buttonPanel.add(myDisconnectButton);
+		
+		// Add buttons to DB panel
+		dbPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-		add(dbPanel);
+		add(dbPanel, BorderLayout.NORTH);
 	}
 
 	private void createTwitterPanel() {
 		JPanel twitterPanel = new JPanel();
 		twitterPanel.setBorder(BorderFactory.createTitledBorder("Twitter"));
+		twitterPanel.setLayout(new BorderLayout());
 
-		twitterPanel.setLayout(new GridLayout(4, 2));
-
-		myStartButton = new JButton("Start Tweeting");
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new FlowLayout(FlowLayout.CENTER));
+		
+		// The enable tweeting button
+		myStartButton = new JButton("Enable Tweeting");
 		myStartButton.setEnabled(true);
 		myStartButton.addActionListener(new ActionListener() {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				// Enable the tweeting
-				myTwitterManager.setTweetingEnabled(true);
+				myTwitterThread.setTweetingEnabled(true);
 
 				// Disable the start button and enable the stop button now
 				// the thread is running
@@ -194,8 +219,10 @@ public class MainApplication extends JFrame {
 				myStopButton.setEnabled(true);
 			}
 		});
-		twitterPanel.add(myStartButton);
-		myStopButton = new JButton("Stop Tweeting");
+		buttonPanel.add(myStartButton);
+		
+		// The disable tweeting button
+		myStopButton = new JButton("Disable Tweeting");
 		myStopButton.setEnabled(false);
 		myStopButton.addActionListener(new ActionListener() {
 			@Override
@@ -205,11 +232,10 @@ public class MainApplication extends JFrame {
 					myDbTweetsModel.remove(0, myDbTweetsModel.getLength());
 
 					// Disable the tweeting
-					myTwitterManager.setTweetingEnabled(false);
+					myTwitterThread.setTweetingEnabled(false);
 
 					// Enable the start button and disable the stop button now
-					// the
-					// thread is stopped
+					// the thread is stopped
 					myStartButton.setEnabled(true);
 					myStopButton.setEnabled(false);
 				} catch (BadLocationException e) {
@@ -218,16 +244,27 @@ public class MainApplication extends JFrame {
 				}
 			}
 		});
-		twitterPanel.add(myStopButton);
+		buttonPanel.add(myStopButton);
+		
+		// Add buttons to twitter
+		twitterPanel.add(buttonPanel, BorderLayout.SOUTH);
 
-		twitterPanel.add(new JLabel("Tweets: "));
+		JPanel tweetsPanel = new JPanel();
+		tweetsPanel.setLayout(new BorderLayout());
+		
+		// Add the tweets
+		tweetsPanel.add(new JLabel("Tweets: "), BorderLayout.NORTH);
 		JTextArea tweetsTextArea = new JTextArea(myDbTweetsModel);
 		tweetsTextArea.setBorder(BorderFactory
 				.createLineBorder(getForeground()));
 		tweetsTextArea.setEditable(false);
-		twitterPanel.add(tweetsTextArea);
+		JScrollPane scrollPane = new JScrollPane(tweetsTextArea);
+		tweetsPanel.add(scrollPane, BorderLayout.CENTER);
+		
+		// Add tweets to the twitter
+		twitterPanel.add(tweetsPanel, BorderLayout.CENTER);
 
-		add(twitterPanel);
+		add(twitterPanel, BorderLayout.CENTER);
 	}
 
 	@Override
@@ -240,10 +277,10 @@ public class MainApplication extends JFrame {
 			stopThread(myDataPublisher);
 
 			// Stop the database thread
-			stopThread(myDbManager);
+			stopThread(myDatabaseThread);
 
 			// Stop the twitter thread
-			stopThread(myTwitterManager);
+			stopThread(myTwitterThread);
 		}
 	}
 

@@ -1,0 +1,110 @@
+
+
+** in the "inventory" db add the three documents into the "publications" collection
+
+
+use inventory
+
+
+db.publications.insert( 
+{
+	_id: "pub3",
+	people: 
+	{ 
+		workers:
+		[
+			{ name:"joe" },
+			{ name:"dirt" },
+			{ name:"jim" },
+			{ name:"bob" }
+		], 
+		writers:
+		[
+			{ name:"sally" },
+			{ name:"brenda" }
+		]
+	},
+	sales: 
+	{ 
+		books:
+		[
+			{
+				title:"good book",count:23423
+			},
+			{
+				title:"bad book",count:3242
+			}
+		]
+	}
+}
+);
+
+db.publications.insert( 
+{
+	_id: "pub2",
+	people: 
+	{ 
+		workers:
+		[
+			{ name:"john" },
+			{ name:"dick" },
+			{ name:"billy" },
+			{ name:"bob" }
+		], 
+		writers:
+		[
+			{ name:"kasana" },
+			{ name:"alice" }
+		]
+	},
+	sales: 
+	{ 
+		books:
+		[
+			{
+				title:"good book",count:2342
+			},
+			{
+				title:"bad book",count:324
+			}
+		]
+	}
+}
+);
+
+db.publications.insert( 
+{
+	_id: "pub1",
+	people: 
+	{ 
+		workers:
+		[
+			{ name:"mean" },
+			{ name:"joe" },
+			{ name:"green" },
+		], 
+		writers:
+		[
+			{ name:"too" },
+			{ name:"bad" }
+		]
+	},
+	sales: 
+	{ 
+		books:
+		[
+			{
+				title:"good book",count:234
+			},
+			{
+				title:"bad book",count:32
+			}
+		]
+	}
+}
+);
+
+** in the "mydb" db add the following documents into the "testData" collection
+
+for (var i = 1; i <= 25; i++) db.testData.insert( { x : i } )
+

@@ -21,20 +21,27 @@ public class DataPublisher extends Thread {
 	private String myDb;
 	private String myCollection;
 	private DBObject myFilter;
-	private TwitterManager myTwitterManager;
+	private TwitterThread myTwitterThread;
 
 	public DataPublisher(MongoConnection connection, String db,
-			String collection, DBObject filter, TwitterManager twitterManager) {
+			String collection, DBObject filter, TwitterThread twitterThread) {
 		this.myConnection = connection;
 		this.myDb = db;
 		this.myCollection = collection;
 		this.myFilter = filter;
-		this.myTwitterManager = twitterManager;
+		this.myTwitterThread = twitterThread;
 	}
 
 	@Override
 	public void run() {
 		MongoClient mongoClient = null;
+
+		// First verify there is stuff to work with - this is hiding the bug
+		// that this thread should not start unless the data is good to go
+		if ((myDb == null) || (myCollection == null) || (myFilter == null)) {
+			return;
+		}
+
 		try {
 			// TODO - more of the connection details could be applied here
 			// Establish connection
@@ -48,7 +55,7 @@ public class DataPublisher extends Thread {
 			// Publish data
 			while ((!isInterrupted()) && (cursor.hasNext())) {
 				String document = cursor.next().toString();
-				myTwitterManager.update(null, document);
+				myTwitterThread.update(null, document);
 			}
 
 		} catch (UnknownHostException e) {
