@@ -1,4 +1,4 @@
-package com.dave;
+package com.mongotweeter;
 
 public class MongoConnection {
 

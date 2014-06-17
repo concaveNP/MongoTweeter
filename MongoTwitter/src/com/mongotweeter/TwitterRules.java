@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.dave;
+package com.mongotweeter;
 
 /**
  * Container for the Twitter rules this application must follow.

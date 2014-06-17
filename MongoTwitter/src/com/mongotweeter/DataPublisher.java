@@ -1,10 +1,9 @@
 /**
  * 
  */
-package com.dave;
+package com.mongotweeter;
 
 import java.net.UnknownHostException;
-import java.util.Observable;
 
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
@@ -22,7 +21,6 @@ public class DataPublisher extends Thread {
 	private String myDb;
 	private String myCollection;
 	private DBObject myFilter;
-	private Observable myObservable = new Observable();
 	private TwitterManager myTwitterManager;
 
 	public DataPublisher(MongoConnection connection, String db,

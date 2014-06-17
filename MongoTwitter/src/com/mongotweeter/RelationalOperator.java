@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.dave;
+package com.mongotweeter;
 
 /**
  * @author dave

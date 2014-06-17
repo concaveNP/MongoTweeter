@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.dave;
+package com.mongotweeter;
 
 import java.util.Observable;
 
@@ -18,6 +18,34 @@ import twitter4j.auth.AccessToken;
  */
 public class TwitterAuthentication extends Observable {
 
+	/**
+	 * This application's key used for OAuth
+	 */
+	public static final String API_KEY = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+	
+	/**
+	 * This application's secret key used for OAuth
+	 */
+	public static final String API_KEY_SECRET = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
+	/**
+	 * The hard coded token for the developer user - for now 
+	 */
+	private static final String CONCAVENP_ACCESS_TOKEN = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
+	/**
+	 * The hard coded secret token for the developer user - for now 
+	 */
+	private static final String CONCAVENP_ACCESS_TOKEN_SECRET = "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
+
+	/**
+	 * The hard coded developer user ID - for now 
+	 */
+	private static long myUserId = 00000000000000000000000000000;
+
+	/**
+	 * The state of the this application being logged in as seen from the user's twitter account
+	 */
 	private Boolean myUserLoggedIn = new Boolean(false);
 
 	/**

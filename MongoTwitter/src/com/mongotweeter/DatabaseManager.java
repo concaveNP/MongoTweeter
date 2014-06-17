@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.dave;
+package com.mongotweeter;
 
 import java.net.UnknownHostException;
 import java.util.StringTokenizer;

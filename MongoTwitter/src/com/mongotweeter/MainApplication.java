@@ -1,7 +1,7 @@
 /**
  * 
  */
-package com.dave;
+package com.mongotweeter;
 
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
@@ -26,6 +26,11 @@ import javax.swing.text.PlainDocument;
 public class MainApplication extends JFrame {
 
 	/**
+	 * Name of the application
+	 */
+	private static final String APPLICATION_NAME = "MongoTweeter";
+
+	/**
 	 * Generated serial ID
 	 */
 	private static final long serialVersionUID = -1186753475176386282L;
@@ -38,6 +43,7 @@ public class MainApplication extends JFrame {
 	private JButton myStopButton;
 	private TwitterManager myTwitterManager;
 	private TwitterAuthentication myTwitterAuth = new TwitterAuthentication();
+	private GistAuthentication myGistAuth = new GistAuthentication();
 	private Document myDbConnectivityStateModel = new PlainDocument();
 	private Document myDbTweetsModel = new PlainDocument();
 	private JButton myConnectButton;
@@ -54,6 +60,7 @@ public class MainApplication extends JFrame {
 		MainApplication application = new MainApplication();
 		application.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 		application.setSize(700, 300);
+		// TODO - get the screen dimension and use those values
 		application.setLocation(700, 400);
 		application.initialize();
 		application.setVisible(true);
@@ -64,7 +71,8 @@ public class MainApplication extends JFrame {
 		// Create the various threads that make up the application
 		myDbManager = new DatabaseManager(myDbConnection,
 				myDbConnectivityStateModel);
-		myTwitterManager = new TwitterManager(myTwitterAuth, myDbTweetsModel);
+		myTwitterManager = new TwitterManager(myTwitterAuth, myGistAuth,
+				myDbTweetsModel);
 
 		setLayout(new GridLayout(2, 1));
 
@@ -241,7 +249,7 @@ public class MainApplication extends JFrame {
 
 	@Override
 	public String getTitle() {
-		return "MongoTweetter";
+		return APPLICATION_NAME;
 	}
 
 	/**
